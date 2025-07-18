@@ -39,10 +39,11 @@ def read_data() -> pd.DataFrame:
 
 # initialise session states
 st.session_state["data"] = read_data()
-st.session_state["id"] = 39
+st.session_state["id"] = 25
 
 ve.main_row(st.session_state["id"])
 
 st.markdown("""---""")
 left, middle, right = st.columns([2, 1, 2])
 middle.markdown("Children")
+ve.children_row(st.session_state["id"])

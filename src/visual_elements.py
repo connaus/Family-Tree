@@ -42,3 +42,16 @@ def main_row(id) -> None:
             col = 2 + (i % 2)
             with columns[col]:
                 person_card(int(id))
+
+
+def children_row(id) -> None:
+    """Display children of a person."""
+    children = data_funcs.find_children(id)
+    if children is None:
+        return
+    columns = st.columns(4)
+    ids = children.index.tolist()
+    for i, id in enumerate(ids):
+        col = i % 4
+        with columns[col]:
+            person_card(int(id))

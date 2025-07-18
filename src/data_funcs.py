@@ -29,3 +29,12 @@ def find_spouse(id: int) -> pd.DataFrame | None:
     if df.empty:
         return None
     return df
+
+
+def find_children(id: int) -> pd.DataFrame | None:
+    """find the spouse of a person by id"""
+    df: pd.DataFrame = st.session_state["data"].copy()
+    df = df[df[Cols.PARENT] == id]
+    if df.empty:
+        return None
+    return df
