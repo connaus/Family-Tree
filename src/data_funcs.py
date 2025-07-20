@@ -9,6 +9,8 @@ from cfg.table_schema import Cols
 def get_person_details(id: int | list[int]) -> pd.DataFrame | pd.Series:
     """retreive the row of the person with the id"""
     df: pd.DataFrame = st.session_state["data"].df
+    if isinstance(id, float):
+        id = int(id)
     person = df.iloc[id]
     if person.empty:
         raise ValueError(f"Person with id {id} not found.")

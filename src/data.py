@@ -19,7 +19,11 @@ class Data:
     def read(self):
         self._df = self.conn.read(
             worksheet=self.worksheet,
-            dtype={Cols.BIRTHDAY: str, Cols.DEATHDATE: str, Cols.MARRIAGEDATE: str},
+            dtype={
+                Cols.BIRTHDAY: str,
+                Cols.DEATHDATE: str,
+                Cols.MARRIAGEDATE: str,
+            },
             ttl=1,
         )
         # df.set_index("id", inplace=True, drop=False)
@@ -87,7 +91,8 @@ class Data:
         person_dict = {}
         for id, name, birthday in people:
             add_person_to_dict(person_dict, name, birthday, id)
-        return person_dict
+        self._person_to_id_map = person_dict
+        return self._person_to_id_map
 
     @property
     def id_to_person_map(self) -> dict[int, str]:
@@ -102,4 +107,13 @@ class Data:
         """Get a sorted list of people names."""
         if self._people is not None:
             return self._people
-        return sorted(self.person_to_id_map.keys())
+        self._people = sorted(self.person_to_id_map.keys())
+        return self._people
+
+    def person_index(self, id: int) -> int:
+        """get the index of the person corresponding to the given id"""
+        return (
+            self.people.index(self.id_to_person_map[id])
+            if id in self.id_to_person_map
+            else 0
+        )
