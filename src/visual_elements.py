@@ -113,7 +113,7 @@ def main_row(id) -> None:
             st.session_state.update(
                 {"editing_id": None, "add_child": None, "add_spouse": id}
             )
-            st.switch_page("pages/1_add_person.py")
+            st.switch_page("pages/1_Add_person.py")
     if sp is not None:
         ids = sp.index.tolist()
         for i, id in enumerate(ids):
