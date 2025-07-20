@@ -4,12 +4,13 @@ import streamlit as st
 from cfg.table_schema import Cols
 from src import data_funcs
 
-st.markdown("# Enter Person Details")
 
 id = st.session_state.get("editing_id", None)
 df = st.session_state["data"].copy()
 people_dict = data_funcs.people_dict()
 people = list(people_dict.keys())
+people.sort()
+
 if id is None:
     row = pd.Series(index=st.session_state["data"].columns)
     row[Cols.ID] = df[Cols.ID].max() + 1
@@ -19,11 +20,15 @@ else:
     row = row.replace({np.nan: None})
 
 
-def text_input(key: Cols):
-    st.text_input(" ", key=f"add_{key}", value=row.get(key), label_visibility="hidden")
+def text_input(title: str, key: Cols):
+    left, right = st.columns([1, 2])
+    left.markdown(f"# {title}")
+    right.text_input(
+        " ", key=f"add_{key}", value=row.get(key), label_visibility="hidden"
+    )
 
 
-def selectbox(key: Cols, options: list[str]):
+def selectbox(title: str, key: Cols, options: list[str]):
     sb_id = row.get(key)
     if id is not None:
         parent_id = int(sb_id)
@@ -31,22 +36,25 @@ def selectbox(key: Cols, options: list[str]):
         start_value = people.index(parent_name)
     else:
         start_value = None
-    st.selectbox(
+    left, right = st.columns([1, 2])
+    left.markdown(f"# {title}")
+    right.write(" ")
+    right.write(" ")
+    right.selectbox(
         "Select Parent",
         options=options,
         index=start_value,
         key=f"add_{key}",
+        label_visibility="collapsed",
     )
 
 
-st.markdown("## Name")
-text_input(Cols.NAME)
+st.markdown("# Enter Person Details")
+text_input("Name", Cols.NAME)
 
-st.markdown("## Parent")
-selectbox(Cols.PARENT, people)
+selectbox("Parent", Cols.PARENT, people)
 
-st.markdown("## Spouse")
-selectbox(Cols.SPOUSE, people)
+selectbox("Spouse", Cols.SPOUSE, people)
 
 if not (
     st.session_state.get(f"add_{Cols.NAME}") is not None
@@ -60,11 +68,48 @@ if not (
     )
     st.stop()
 
-st.markdown("## Birth Date\n\nEnter in any Format")
-text_input(Cols.BIRTHDAY)
-st.markdown("## Birth Place")
-text_input(Cols.BIRTHPLACE)
+# st.markdown("## Birth Date\n\nEnter in any Format")
+text_input("Birth Date", Cols.BIRTHDAY)
+# st.markdown("## Birth Place")
+text_input("Birth Place", Cols.BIRTHPLACE)
 
 if st.session_state.get(f"add_{Cols.SPOUSE}", ""):
-    st.markdown("## Marriage Date")
-    text_input(Cols.MARRIAGEDATE)
+    # st.markdown("## Marriage Date")
+    text_input("Marriage Date", Cols.MARRIAGEDATE)
+
+
+def add_value_to_row(key: Cols):
+    """Add a value to the row based on the key."""
+    if key in (Cols.PARENT, Cols.SPOUSE):
+        value = st.session_state.get(f"add_{key}")
+        if value is not None:
+            # Convert to ID if it's a name
+            if isinstance(value, str) and value in people_dict:
+                row[key] = people_dict[value]
+            else:
+                row[key] = value
+    else:
+        value = st.session_state.get(f"add_{key}")
+        if value is not None:
+            row[key] = value
+
+
+st.markdown("---")
+left, middle, right = st.columns([1, 1, 1])
+if left.button("Save Changes", key="save_changes"):
+    add_value_to_row(Cols.NAME)
+    add_value_to_row(Cols.NAME)
+    add_value_to_row(Cols.PARENT)
+    add_value_to_row(Cols.SPOUSE)
+    add_value_to_row(Cols.BIRTHDAY)
+    add_value_to_row(Cols.BIRTHPLACE)
+    if st.session_state.get(f"add_{Cols.SPOUSE}", ""):
+        add_value_to_row(Cols.MARRIAGEDATE)
+
+    if st.session_state.get("editing_id", None) is not None:
+        df[df[id] == id] = row
+    else:
+        df = pd.concat([df, pd.DataFrame([row.to_dict()])], ignore_index=True)
+    st.markdown(":green[Changes saved successfully!]")
+elif right.button("Cancel", key="cancel_add_person"):
+    st.switch_page("app.py")
