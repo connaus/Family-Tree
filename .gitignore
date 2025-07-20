@@ -1,4 +1,5 @@
 .venv*
 scratch*
-.streamlit*
+.streamlit/secrets.toml
 *.pyc
+start.bat

@@ -1,3 +1,5 @@
+import re
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -6,7 +8,9 @@ from cfg.table_schema import Cols
 
 def get_person_details(id: int | list[int]) -> pd.DataFrame | pd.Series:
     """retreive the row of the person with the id"""
-    df: pd.DataFrame = st.session_state["data"].copy()
+    df: pd.DataFrame = st.session_state["data"].df
+    if isinstance(id, float):
+        id = int(id)
     person = df.iloc[id]
     if person.empty:
         raise ValueError(f"Person with id {id} not found.")
@@ -24,7 +28,7 @@ def get_col_value(id: int, column: Cols) -> int | str | None:
 
 def find_spouse(id: int) -> pd.DataFrame | None:
     """find the spouse of a person by id"""
-    df: pd.DataFrame = st.session_state["data"].copy()
+    df: pd.DataFrame = st.session_state["data"].df
     df = df[df[Cols.SPOUSE] == id]
     if df.empty:
         return None
@@ -33,7 +37,7 @@ def find_spouse(id: int) -> pd.DataFrame | None:
 
 def find_children(id: int) -> pd.DataFrame | None:
     """find the spouse of a person by id"""
-    df: pd.DataFrame = st.session_state["data"].copy()
+    df: pd.DataFrame = st.session_state["data"].df
     df = df[df[Cols.PARENT] == id]
     if df.empty:
         return None

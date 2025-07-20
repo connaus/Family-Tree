@@ -1,0 +1,119 @@
+import re
+import numpy as np
+import pandas as pd
+from streamlit_gsheets import GSheetsConnection
+import streamlit as st
+
+from cfg.table_schema import Cols
+
+
+class Data:
+    def __init__(self, worksheet: str = "Sheet1"):
+        self.conn = st.connection("gsheets", type=GSheetsConnection)
+        self.worksheet = worksheet
+        self._df: pd.DataFrame | None = None
+        self._person_to_id_map: dict[str, int] | None = None
+        self._id_to_person_map: dict[int, str] | None = None
+        self._people: list[str] | None = None
+
+    def read(self):
+        self._df = self.conn.read(
+            worksheet=self.worksheet,
+            dtype={
+                Cols.BIRTHDAY: str,
+                Cols.DEATHDATE: str,
+                Cols.MARRIAGEDATE: str,
+            },
+            ttl=1,
+        )
+        # df.set_index("id", inplace=True, drop=False)
+        return self._df
+
+    def update(self, data=None):
+        if data is not None:
+            self.conn.update(worksheet=self.worksheet, data=data)
+            self.read()
+
+    @property
+    def df(self) -> pd.DataFrame:
+        if self._df is None:
+            self._df = self.read()
+            self._df.replace({np.nan: None}, inplace=True)
+            self._person_to_id_map = None
+            self._id_to_person_map = None
+            # self._df.set_index("id", inplace=True, drop=False)
+        return self._df
+
+    @df.setter
+    def df(self, value: pd.DataFrame) -> None:
+        """Set the DataFrame and reset the cached maps."""
+        self.update(value)
+        self._person_to_id_map = None
+        self._id_to_person_map = None
+        self._people = None
+
+    @property
+    def person_to_id_map(self) -> dict[str, int]:
+        """Create a dictionary of people with their names and birthdays as the key and their IDs as the value."""
+        if self._person_to_id_map is not None:
+            return self._person_to_id_map
+        df = self.df.copy()
+        people = df[[Cols.ID, Cols.NAME, Cols.BIRTHDAY]].values.tolist()
+
+        def person_string(name: str, birthday: str) -> str:
+            return f"{name} ({birthday})" if birthday else name
+
+        def append_or_increment_tag(s, count=2):
+            # Pattern to detect [number] at the end of the string
+            match = re.search(r"\[(\d+)\]$", s)
+
+            if match:
+                # Extract the current number and increment it
+                current_num = int(match.group(1)) + 1
+                s = re.sub(r"\[\d+\]$", f"[{current_num}]", s)
+            else:
+                # Append [2] if there's no existing tag
+                s += f"[{count}]"
+
+            print(s)  # Display each step if needed
+            if count < 10:  # Set a stopping condition to avoid infinite recursion
+                return append_or_increment_tag(s, count + 1)
+            else:
+                return s
+
+        def add_person_to_dict(d: dict, name: str, birthday: str, id: int) -> None:
+            key = person_string(name, birthday)
+            if key in d:
+                # If the key already exists, append a number to make it unique
+                key = append_or_increment_tag(key)
+            d[key] = id
+
+        person_dict = {}
+        for id, name, birthday in people:
+            add_person_to_dict(person_dict, name, birthday, id)
+        self._person_to_id_map = person_dict
+        return self._person_to_id_map
+
+    @property
+    def id_to_person_map(self) -> dict[int, str]:
+        """Create a dictionary of IDs with their names and birthdays as the value."""
+        if self._id_to_person_map is not None:
+            return self._id_to_person_map
+        self._id_to_person_map = {v: k for k, v in self.person_to_id_map.items()}
+        return self._id_to_person_map
+
+    @property
+    def people(self) -> list[str]:
+        """Get a sorted list of people names."""
+        if self._people is not None:
+            return self._people
+        self._people = sorted(self.person_to_id_map.keys())
+        return self._people
+
+    def person_index(self, id: int) -> int:
+        """get the index of the person corresponding to the given id"""
+        return (
+            self.people.index(self.id_to_person_map[id])
+            if id in self.id_to_person_map
+            else 0
+        )
