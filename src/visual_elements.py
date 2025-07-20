@@ -8,19 +8,6 @@ from streamlit.delta_generator import DeltaGenerator
 def person_card(id: int, conn: DeltaGenerator):
     """Display a card with person's details."""
     # conn = st.container(border=False)
-    edit, _ = conn.columns([1, 1.5])
-    if edit.button(
-        "Edit",
-        key=f"edit_{id}",
-        use_container_width=True,
-        on_click=lambda: st.session_state.update(
-            {"editing_id": id, "add_child": None, "add_spouse": None}
-        ),
-    ):
-        st.session_state.update(
-            {"editing_id": id, "add_child": None, "add_spouse": None}
-        )
-        st.switch_page("pages/1_Add_person.py")
     name = data_funcs.get_col_value(id, Cols.NAME)
     birthplace = data_funcs.get_col_value(id, Cols.BIRTHPLACE)
     birthday = data_funcs.get_col_value(id, Cols.BIRTHDAY)
@@ -58,6 +45,18 @@ def main_row_card(id: int) -> None:
             st.session_state["id"] = parent_id
             st.rerun()
     person_card(id, conn)
+    if st.button(
+        "Edit",
+        key=f"edit_{id}",
+        use_container_width=True,
+        on_click=lambda: st.session_state.update(
+            {"editing_id": id, "add_child": None, "add_spouse": None}
+        ),
+    ):
+        st.session_state.update(
+            {"editing_id": id, "add_child": None, "add_spouse": None}
+        )
+        st.switch_page("pages/1_Add_person.py")
 
 
 def spouse_card(id: int) -> None:
@@ -67,6 +66,18 @@ def spouse_card(id: int) -> None:
     marriage_date = data_funcs.get_col_value(id, Cols.MARRIAGEDATE)
     if marriage_date is not None:
         conn.markdown(f"**Marrriage Date**\n\n{marriage_date}")
+    if st.button(
+        "Edit",
+        key=f"edit_{id}",
+        use_container_width=True,
+        on_click=lambda: st.session_state.update(
+            {"editing_id": id, "add_child": None, "add_spouse": None}
+        ),
+    ):
+        st.session_state.update(
+            {"editing_id": id, "add_child": None, "add_spouse": None}
+        )
+        st.switch_page("pages/1_Add_person.py")
 
 
 def child_card(id: int) -> None:
@@ -98,6 +109,11 @@ def main_row(id) -> None:
                 st.markdown("Spouse:")
             else:
                 st.markdown("Spouses:")
+        if st.button("Add Spouse", key="add_spouse_button"):
+            st.session_state.update(
+                {"editing_id": None, "add_child": None, "add_spouse": id}
+            )
+            st.switch_page("pages/1_add_person.py")
     if sp is not None:
         ids = sp.index.tolist()
         for i, id in enumerate(ids):
@@ -109,11 +125,23 @@ def main_row(id) -> None:
 def children_row(id) -> None:
     """Display children of a person."""
     children = data_funcs.find_children(id)
-    if children is None:
-        return
     columns = st.columns(4)
-    ids = children.index.tolist()
-    for i, id in enumerate(ids):
-        col = i % 4
-        with columns[col]:
-            child_card(int(id))
+    if children is not None:
+        ids = children.index.tolist()
+        for i, id in enumerate(ids):
+            col = i % 4
+            with columns[col]:
+                child_card(int(id))
+    if columns[0].button(
+        "Add Child",
+        key=f"add_child_{id}",
+        use_container_width=True,
+    ):
+        st.session_state.update(
+            {
+                "editing_id": None,
+                "add_child": st.session_state["id"],
+                "add_spouse": None,
+            }
+        )
+        st.switch_page("pages/1_Add_person.py")

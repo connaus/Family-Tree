@@ -42,7 +42,9 @@ authenticator.logout("Logout", "main")
 # initialise session states
 st.session_state["data"] = read_data()
 st.session_state["id"] = st.session_state.get("id", 25)
+st.session_state["edit_row"] = None
 
+st.markdown("# Tree Navigation")
 ve.main_row(st.session_state["id"])
 
 st.markdown("""---""")
