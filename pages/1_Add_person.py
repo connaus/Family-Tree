@@ -4,10 +4,11 @@ import streamlit as st
 from cfg.table_schema import Cols
 from src import data_funcs
 
-
+# set up
 id = st.session_state.get("editing_id", None)
 df = st.session_state["data"].copy()
 people_dict = data_funcs.people_dict()
+rev_people_dict = {v: k for k, v in people_dict.items()}
 people = list(people_dict.keys())
 people.sort()
 
@@ -15,9 +16,17 @@ if id is None:
     row = pd.Series(index=st.session_state["data"].columns)
     row[Cols.ID] = df[Cols.ID].max() + 1
     row = row.replace({np.nan: None})
+    parent = st.session_state.get("add_child", None)
+    spouse = st.session_state.get("add_spuose", None)
+    if parent is not None:
+        row[Cols.PARENT] = people_dict.get(parent, None)
+    if spouse is not None:
+        row[Cols.SPOUSE] = people_dict.get(spouse, None)
 else:
     row = df[df[Cols.ID] == id]
-    row = row.replace({np.nan: None})
+    if isinstance(row, pd.DataFrame):
+        row = row.iloc[0]
+row = row.replace({np.nan: None})
 
 
 def text_input(title: str, key: Cols):
@@ -30,10 +39,11 @@ def text_input(title: str, key: Cols):
 
 def selectbox(title: str, key: Cols, options: list[str]):
     sb_id = row.get(key)
-    if id is not None:
-        parent_id = int(sb_id)
-        parent_name = df[df[Cols.ID] == parent_id][Cols.NAME].values[0]
-        start_value = people.index(parent_name)
+    if id is not None and sb_id is not None:
+        start_id = int(sb_id)
+        start_name = rev_people_dict[start_id]
+        # parent_name = df[df[Cols.ID] == parent_id][Cols.NAME].values[0]
+        start_value = people.index(start_name)
     else:
         start_value = None
     left, right = st.columns([1, 2])
@@ -113,3 +123,6 @@ if left.button("Save Changes", key="save_changes"):
     st.markdown(":green[Changes saved successfully!]")
 elif right.button("Cancel", key="cancel_add_person"):
     st.switch_page("app.py")
+st.page_link("app.py")
+st.dataframe(row.to_frame().T, use_container_width=True)
+st.dataframe(df, use_container_width=True)

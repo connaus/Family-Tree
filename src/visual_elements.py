@@ -8,6 +8,19 @@ from streamlit.delta_generator import DeltaGenerator
 def person_card(id: int, conn: DeltaGenerator):
     """Display a card with person's details."""
     # conn = st.container(border=False)
+    edit, _ = conn.columns([1, 1.5])
+    if edit.button(
+        "Edit",
+        key=f"edit_{id}",
+        use_container_width=True,
+        on_click=lambda: st.session_state.update(
+            {"editing_id": id, "add_child": None, "add_spouse": None}
+        ),
+    ):
+        st.session_state.update(
+            {"editing_id": id, "add_child": None, "add_spouse": None}
+        )
+        st.switch_page("pages/1_Add_person.py")
     name = data_funcs.get_col_value(id, Cols.NAME)
     birthplace = data_funcs.get_col_value(id, Cols.BIRTHPLACE)
     birthday = data_funcs.get_col_value(id, Cols.BIRTHDAY)

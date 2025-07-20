@@ -37,7 +37,7 @@ def read_data() -> pd.DataFrame:
     return df
 
 
-authenticator.logout("Logout", "sidebar")
+authenticator.logout("Logout", "main")
 
 # initialise session states
 st.session_state["data"] = read_data()
