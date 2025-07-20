@@ -131,9 +131,17 @@ if left.button("Save Changes", key="save_changes"):
         df[df["id"] == id] = row
     else:
         df = pd.concat([df, pd.DataFrame([row.to_dict()])], ignore_index=True)
+    st.session_state["gsheets_conn"].update(worksheet="Sheet1", data=df)
     st.session_state["data"] = df
     st.markdown(":green[Changes saved successfully!]")
-    st.session_state["edit_row"] = None
+    st.session_state.update(
+        {
+            "editing_id": None,
+            "add_child": None,
+            "add_spouse": None,
+            "data": df,
+        }
+    )
 if right.button("Cancel", key="cancel_add_person"):
     st.switch_page("app.py")
     st.session_state["edit_row"] = None

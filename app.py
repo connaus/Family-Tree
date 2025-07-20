@@ -2,7 +2,6 @@ import pandas as pd
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
 import streamlit_authenticator as stauth
-from cfg.table_schema import Cols
 import src.visual_elements as ve
 
 st.set_page_config(layout="wide")
@@ -31,7 +30,7 @@ if not st.session_state["authentication_status"]:
 
 def read_data() -> pd.DataFrame:
     conn = st.connection("gsheets", type=GSheetsConnection)
-
+    st.session_state["gsheets_conn"] = conn
     df = conn.read(worksheet="Sheet1", dtype={"birthday": str, "deathdate": str})
     df.set_index("id", inplace=True, drop=False)
     return df
