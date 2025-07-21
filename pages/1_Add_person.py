@@ -15,7 +15,6 @@ if st.session_state.get("edit_row", None) is not None:
     row: pd.Series = st.session_state["edit_row"]
 elif id is None:
     row = pd.Series(index=df.columns)
-    row[Cols.ID] = df[Cols.ID].max() + 1
     if parent is not None:
         row[Cols.PARENT] = parent
     if spouse is not None:
@@ -127,10 +126,25 @@ if left.button("Save Changes", key="save_changes"):
     add_value_to_row(Cols.BIRTHDAY)
     add_value_to_row(Cols.BIRTHPLACE)
     add_value_to_row(Cols.MARRIAGEDATE)
-
+    # update data to ensure that we are changing the latest available data
+    current_data = data.read()
     if st.session_state.get("editing_id", None) is not None:
+        saved_row: pd.Series = current_data[current_data["id"] == id].iloc[0]
+        if not saved_row.equals(row):
+            st.markdown(
+                ":green[No changes made to the data as it has been updated by another user! Please try again later.]"
+            )
+            st.session_state.update(
+                {
+                    "editing_id": None,
+                    "add_child": None,
+                    "add_spouse": None,
+                }
+            )
+            st.stop()
         df[df["id"] == id] = row
     else:
+        row[Cols.ID] = int(current_data[Cols.ID].max() + 1)
         df = pd.concat([df, pd.DataFrame([row.to_dict()])], ignore_index=True)
     data.df = df
     st.markdown(":green[Changes saved successfully!]")
