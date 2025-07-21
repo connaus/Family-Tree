@@ -1,7 +1,4 @@
-import pandas as pd
 import streamlit as st
-from streamlit_gsheets import GSheetsConnection
-import streamlit_authenticator as stauth
 from src.data import Data
 import src.visual_elements as ve
 from src.authentication import Authenticator
