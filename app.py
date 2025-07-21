@@ -21,7 +21,13 @@ st.session_state["add_child"] = None
 st.session_state["add_spouse"] = None
 
 data: Data = st.session_state["data"]
+
 st.markdown("# Tree Navigation")
+if st.button(
+    "See Full Tree",
+    key="full_tree_navigation",
+):
+    st.switch_page("pages/Full_Tree.py")
 st.selectbox(
     "Select Person",
     options=data.people,
