@@ -26,7 +26,8 @@ def person_and_children(data: Data, id: int, tabs: int = 1) -> str:
     """Write a line for the provided person, and then one for each child"""
     data = st.session_state["data"]
     person = data.id_to_person_map[id]
-    s = name(person, generation=tabs, highlight=st.session_state["id"] == id)
+    highlight_list = data_funcs.get_ancestors(st.session_state["id"])
+    s = name(person, generation=tabs, highlight=id in highlight_list)
     spouses = data_funcs.find_spouse(id)
     if spouses is not None:
         spouse_ids = spouses[Cols.ID].tolist()

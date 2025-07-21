@@ -1,5 +1,3 @@
-import re
-import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -42,3 +40,15 @@ def find_children(id: int) -> pd.DataFrame | None:
     if df.empty:
         return None
     return df
+
+
+@st.cache_data
+def get_ancestors(id, ancestors: list[int] = []) -> list[int]:
+    ancestors.append(id)
+    if id == 0:
+        return ancestors
+    parent = get_col_value(id, Cols.PARENT)
+    if parent is None:
+        return []
+    get_ancestors(parent, ancestors)
+    return ancestors
