@@ -148,7 +148,6 @@ if left.button("Save Changes", key="save_changes"):
         row[Cols.ID] = int(current_data[Cols.ID].max() + 1)
         df = pd.concat([df, pd.DataFrame([row.to_dict()])], ignore_index=True)
     data.df = df
-    st.markdown(":green[Changes saved successfully!]")
     st.session_state.update(
         {
             "original_row": None,
@@ -157,6 +156,7 @@ if left.button("Save Changes", key="save_changes"):
             "add_spouse": None,
         }
     )
+    st.switch_page("app.py")
 if right.button("Cancel", key="cancel_add_person"):
     st.switch_page("app.py")
     st.session_state["edit_row"] = None
