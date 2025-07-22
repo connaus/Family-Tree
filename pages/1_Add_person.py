@@ -120,6 +120,7 @@ def add_value_to_row(key: Cols):
 st.markdown("---")
 left, middle, right = st.columns([1, 1, 1])
 if left.button("Save Changes", key="save_changes"):
+    st.markdown(":green[Saving...]")
     add_value_to_row(Cols.NAME)
     add_value_to_row(Cols.NAME)
     add_value_to_row(Cols.PARENT)
