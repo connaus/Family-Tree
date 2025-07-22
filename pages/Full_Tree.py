@@ -24,7 +24,7 @@ def new_line() -> str:
 
 def person_and_children(data: Data, id: int, tabs: int = 1) -> str:
     """Write a line for the provided person, and then one for each child"""
-    data = st.session_state["data"]
+    data = st.session_state.get("data", Data())
     person = data.id_to_person_map[id]
     highlight_list = data_funcs.get_lineage(st.session_state["id"])
     relationship = data_funcs.get_relationship(st.session_state["id"], id)
@@ -50,7 +50,7 @@ def person_and_children(data: Data, id: int, tabs: int = 1) -> str:
     return s
 
 
-data = st.session_state["data"]
+data = st.session_state.get("data", Data())
 if st.button("Go Back to Tree Navigation", key="return_to_tree_navigation"):
     st.switch_page("app.py")
 st.selectbox(
