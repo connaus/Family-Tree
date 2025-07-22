@@ -4,12 +4,12 @@ from src.data import Data
 import src.data_funcs as data_funcs
 
 
-def name(name: str, generation: int = 1, highlight=False) -> str:
+def name(name: str, relationship: str, generation: int = 1, highlight=False) -> str:
     """A name with a unicode character prefix"""
     return (
-        f"\u251c\u2500 {generation}. {name}"
+        f"\u251c\u2500 {generation}. {name} ({relationship})"
         if not highlight
-        else f"\u251c\u2500 {generation}. :green[{name}]"
+        else f"\u251c\u2500 {generation}. :green[{name}] ({relationship})"
     )
 
 
@@ -26,8 +26,9 @@ def person_and_children(data: Data, id: int, tabs: int = 1) -> str:
     """Write a line for the provided person, and then one for each child"""
     data = st.session_state["data"]
     person = data.id_to_person_map[id]
-    highlight_list = data_funcs.get_ancestors(st.session_state["id"])
-    s = name(person, generation=tabs, highlight=id in highlight_list)
+    highlight_list = data_funcs.get_lineage(st.session_state["id"])
+    relationship = data_funcs.get_relationship(st.session_state["id"], id)
+    s = name(person, relationship, generation=tabs, highlight=id in highlight_list)
     spouses = data_funcs.find_spouse(id)
     if spouses is not None:
         spouse_ids = spouses[Cols.ID].tolist()
@@ -38,7 +39,7 @@ def person_and_children(data: Data, id: int, tabs: int = 1) -> str:
             ]
             s += new_line() + tab(tabs) + f" x {spouse_name}"
             if marriage_date is not None:
-                s += f" (\u2020 {marriage_date})"
+                s += f" (o {marriage_date})"
     children = data_funcs.find_children(id)
     if children is None:
         return s

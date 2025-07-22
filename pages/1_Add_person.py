@@ -20,6 +20,7 @@ elif id is None:
     if spouse is not None:
         row[Cols.SPOUSE] = spouse
 else:
+    st.session_state["original_row"] = df[df[Cols.ID] == id].iloc[0]
     row = df[df[Cols.ID] == id].iloc[0]
 row = row.replace({np.nan: None})
 
@@ -130,7 +131,7 @@ if left.button("Save Changes", key="save_changes"):
     current_data = data.read()
     if st.session_state.get("editing_id", None) is not None:
         saved_row: pd.Series = current_data[current_data["id"] == id].iloc[0]
-        if not saved_row.equals(row):
+        if not saved_row.equals(st.session_state["original_row"]):
             st.markdown(
                 ":green[No changes made to the data as it has been updated by another user! Please try again later.]"
             )
@@ -150,6 +151,7 @@ if left.button("Save Changes", key="save_changes"):
     st.markdown(":green[Changes saved successfully!]")
     st.session_state.update(
         {
+            "original_row": None,
             "editing_id": None,
             "add_child": None,
             "add_spouse": None,
