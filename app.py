@@ -17,7 +17,7 @@ st.session_state["edit_row"] = None
 st.session_state["add_child"] = None
 st.session_state["add_spouse"] = None
 
-data: Data = st.session_state["data"]
+data: Data = st.session_state.get("data", Data())
 
 st.markdown("# Tree Navigation")
 if st.button(

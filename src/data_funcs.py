@@ -2,11 +2,12 @@ import pandas as pd
 import streamlit as st
 
 from cfg.table_schema import Cols
+from src.data import Data
 
 
 def get_person_details(id: int | list[int]) -> pd.DataFrame | pd.Series:
     """retreive the row of the person with the id"""
-    df: pd.DataFrame = st.session_state["data"].df
+    df: pd.DataFrame = st.session_state.get("data", Data()).df
     if isinstance(id, float):
         id = int(id)
     person = df.loc[id]
@@ -26,7 +27,7 @@ def get_col_value(id: int, column: Cols) -> int | str | None:
 
 def find_spouse(id: int) -> pd.DataFrame | None:
     """find the spouse of a person by id"""
-    df: pd.DataFrame = st.session_state["data"].df
+    df: pd.DataFrame = st.session_state.get("data", Data()).df
     df = df[df[Cols.SPOUSE] == id]
     if df.empty:
         return None
@@ -35,7 +36,7 @@ def find_spouse(id: int) -> pd.DataFrame | None:
 
 def find_children(id: int) -> pd.DataFrame | None:
     """find the spouse of a person by id"""
-    df: pd.DataFrame = st.session_state["data"].df
+    df: pd.DataFrame = st.session_state.get("data", Data()).df
     df = df[df[Cols.PARENT] == id]
     if df.empty:
         return None
