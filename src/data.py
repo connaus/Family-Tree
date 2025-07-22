@@ -41,7 +41,7 @@ class Data:
             self._df.replace({np.nan: None}, inplace=True)
             self._person_to_id_map = None
             self._id_to_person_map = None
-            # self._df.set_index("id", inplace=True, drop=False)
+            self._df.set_index("id", inplace=True, drop=False)
         return self._df
 
     @df.setter
@@ -63,29 +63,31 @@ class Data:
         def person_string(name: str, birthday: str) -> str:
             return f"{name} ({birthday})" if birthday else name
 
-        def append_or_increment_tag(s, count=2):
+        def append_or_increment_tag(key: str, d: dict[str, int], count=2):
             # Pattern to detect [number] at the end of the string
-            match = re.search(r"\[(\d+)\]$", s)
+            match = re.search(r"\[(\d+)\]$", key)
 
             if match:
                 # Extract the current number and increment it
                 current_num = int(match.group(1)) + 1
-                s = re.sub(r"\[\d+\]$", f"[{current_num}]", s)
+                key = re.sub(r"\[\d+\]$", f"[{current_num}]", key)
             else:
                 # Append [2] if there's no existing tag
-                s += f"[{count}]"
+                key += f"[{count}]"
 
-            print(s)  # Display each step if needed
-            if count < 10:  # Set a stopping condition to avoid infinite recursion
-                return append_or_increment_tag(s, count + 1)
+            print(key)  # Display each step if needed
+            if (
+                key in d and count < 10
+            ):  # Set a stopping condition to avoid infinite recursion
+                return append_or_increment_tag(key, d, count + 1)
             else:
-                return s
+                return key
 
         def add_person_to_dict(d: dict, name: str, birthday: str, id: int) -> None:
             key = person_string(name, birthday)
             if key in d:
                 # If the key already exists, append a number to make it unique
-                key = append_or_increment_tag(key)
+                key = append_or_increment_tag(key, d, count=2)
             d[key] = id
 
         person_dict = {}

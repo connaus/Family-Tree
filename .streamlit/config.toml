@@ -1,6 +1,7 @@
 [theme]
 base="dark"
 primaryColor="forestGreen"
+borderColor="forestGreen"
 
 [client]
 showSidebarNavigation = false
