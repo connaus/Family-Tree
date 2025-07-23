@@ -92,9 +92,11 @@ if not (
     st.stop()
 
 # st.markdown("## Birth Date\n\nEnter in any Format")
-text_input("Birth Date", Cols.BIRTHDAY)
+text_input("Date of Birth", Cols.BIRTHDAY)
 # st.markdown("## Birth Place")
 text_input("Birth Place", Cols.BIRTHPLACE)
+
+text_input("Date of Death", Cols.DEATHDATE)
 
 if st.session_state.get(f"add_{Cols.SPOUSE}_selectbox", ""):
     # st.markdown("## Marriage Date")
