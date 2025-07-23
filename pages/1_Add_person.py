@@ -64,11 +64,12 @@ def selectbox(title: str, key: Cols, options: list[str]):
         "Clear Selection",
         key=f"clear_{key}",
         use_container_width=True,
+        type="primary",
         on_click=lambda: st.session_state.update({f"add_{key}_selectbox": None}),
     )
 
 
-if st.button("Go Back to Tree", key="return_to_tree"):
+if st.button("Go Back to Tree", key="return_to_tree", type="primary"):
     st.switch_page("app.py")
     st.session_state["edit_row"] = None
 st.markdown("# Enter Person Details")
@@ -119,7 +120,7 @@ def add_value_to_row(key: Cols):
 
 st.markdown("---")
 left, middle, right = st.columns([1, 1, 1])
-if left.button("Save Changes", key="save_changes"):
+if left.button("Save Changes", key="save_changes", type="primary"):
     st.markdown(":green[Saving...]")
     add_value_to_row(Cols.NAME)
     add_value_to_row(Cols.NAME)
@@ -158,6 +159,6 @@ if left.button("Save Changes", key="save_changes"):
         }
     )
     st.switch_page("app.py")
-if right.button("Cancel", key="cancel_add_person"):
+if right.button("Cancel", key="cancel_add_person", type="primary"):
     st.switch_page("app.py")
     st.session_state["edit_row"] = None

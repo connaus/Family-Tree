@@ -25,8 +25,8 @@ st.session_state["add_spouse"] = None
 data: Data = st.session_state.get("data", Data())
 
 st.markdown("# Tree Navigation")
-st.info(
-    "This site shows the decendants of Patrick and Owen Connaughton. Only their direct decendants and their spouses are included."
+st.warning(
+    "This site shows the descendants of Patrick and Owen Connaughton. Only their direct descendants and their spouses are included."
 )
 st.markdown("---")
 st.markdown("## Options")
@@ -65,6 +65,20 @@ st.info(
 )
 st.markdown("---")
 st.markdown("## Descendant")
+lineage = data_funcs.get_lineage(st.session_state["id"])
+ca = data_funcs.common_ancestors(
+    st.session_state["relationship_base_id"], st.session_state["id"]
+)
+if lineage:
+    lineage_names = [
+        (
+            f"**{data_funcs.get_col_value(i, Cols.NAME)}**"
+            if i in ca
+            else str(data_funcs.get_col_value(i, Cols.NAME))
+        )
+        for i in lineage
+    ]
+    st.markdown(f"({', '.join(lineage_names)})")
 ve.main_row(st.session_state["id"])
 
 st.markdown("""---""")
