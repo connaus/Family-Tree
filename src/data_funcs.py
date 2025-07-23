@@ -53,30 +53,43 @@ def get_lineage(id) -> list[int]:
 
 
 @st.cache_data
-def common_ancestor(start_id: int, end_id: int) -> int:
-    """returns teh id of the common ancestor between two people"""
+def common_ancestors(start_id: int, end_id: int) -> list[int]:
+    """returns the list of ids of the common ancestors between two people"""
     start_lineage = get_lineage(start_id)
     end_lineage = get_lineage(end_id)
-    return int([i for i in start_lineage if i in end_lineage][0])
+    return [i for i in start_lineage if i in end_lineage]
+
+
+def nearest_relation(start_id: int, end_id: int) -> int | None:
+    """returns teh id of the common ancestor between two people"""
+    cas = common_ancestors(start_id, end_id)
+    if cas:
+        return cas[0]
+    return None
 
 
 @st.cache_data
 def get_shortest_path(start_id: int, end_id: int) -> list[int]:
     """returns a list of ids, where each subsequesnt id is a parent or child of the previous person.
     start_id will be the first id on the list and end_id will be the last id"""
+    nr = nearest_relation(start_id, end_id)
+    if nr is None:
+        return []
     start_to_ca = [
         int(i) for i in get_lineage(start_id) if i not in get_lineage(end_id)
     ]
     end_to_ca = [int(i) for i in get_lineage(end_id) if i not in get_lineage(start_id)]
-    return start_to_ca + [common_ancestor(start_id, end_id)] + end_to_ca
+    return start_to_ca + [nr] + end_to_ca
 
 
 @st.cache_data
 def get_relationship(start_id: int, end_id: int) -> str:
     """returns the relationship between the two supplied people"""
     path = get_shortest_path(start_id, end_id)
-    ca = common_ancestor(start_id, end_id)
-    ca_idx = path.index(ca)
+    nr = nearest_relation(start_id, end_id)
+    if nr is None:
+        return ""
+    ca_idx = path.index(nr)
     pl = len(path)
     if pl == 0:
         return "Not Direct Relation"
@@ -126,4 +139,26 @@ def get_relationship(start_id: int, end_id: int) -> str:
         return f"Great X{pl-5} Grand-niece/Grand-nephew"
     if pl >= 6 and ca_idx == pl - 2:
         return f"Great X{pl-5} Grand-aunt/Grand-uncle"
-    return ""
+    dist_to_end = (pl - 1) - ca_idx
+    min_dist = min(ca_idx, dist_to_end)
+    s = ""
+    if min_dist == 2:
+        s += "First "
+    if min_dist == 3:
+        s += "Second "
+    if min_dist == 4:
+        s += "third "
+    if min_dist == 5:
+        s += f"{min_dist - 1}th "
+    s += "Cousin"
+    removed = abs(ca_idx - dist_to_end)
+    if removed == 0:
+        return s
+    if removed == 1:
+        s += " once removed"
+        return s
+    if removed == 2:
+        s += " twice removed"
+        return s
+    s += f"{removed} times remove"
+    return s

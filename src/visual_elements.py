@@ -12,6 +12,13 @@ def person_card(id: int, conn: DeltaGenerator):
     birthplace = data_funcs.get_col_value(id, Cols.BIRTHPLACE)
     birthday = data_funcs.get_col_value(id, Cols.BIRTHDAY)
     deathday = data_funcs.get_col_value(id, Cols.DEATHDATE)
+    relationship = data_funcs.get_relationship(
+        st.session_state.get("relationship_base_id", 0), id
+    )
+    if relationship:
+        conn.markdown(
+            f"**{data_funcs.get_relationship(st.session_state.get("relationship_base_id", 0), id)}**"
+        )
     conn.markdown(f"**Name**\n\n{name}")
     years = ""
     if birthday is not None:
