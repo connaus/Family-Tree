@@ -41,7 +41,7 @@ def person_and_children(data: Data, id: int, tabs: int = 1) -> str:
             ]
             s += new_line() + tab(tabs) + f" x {spouse_name}"
             if marriage_date is not None:
-                s += f" (o {marriage_date})"
+                s += f" (x {marriage_date})"
     children = data_funcs.find_children(id)
     if children is None:
         return s
