@@ -1,4 +1,6 @@
 import streamlit as st
+from cfg.table_schema import Cols
+from src import data_funcs
 from src.data import Data
 import src.visual_elements as ve
 from src.authentication import Authenticator
@@ -23,19 +25,21 @@ st.session_state["add_spouse"] = None
 data: Data = st.session_state.get("data", Data())
 
 st.markdown("# Tree Navigation")
-if st.button(
-    "See Full Tree",
-    key="full_tree_navigation",
-):
+st.info(
+    "This site shows the decendants of Patrick and Owen Connaughton. Only their direct decendants and their spouses are included."
+)
+st.markdown("---")
+st.markdown("## Options")
+st.markdown("To see the full tree click here:")
+if st.button("View Full Tree", key="full_tree_navigation", type="primary"):
     st.switch_page("pages/Full_Tree.py")
+st.write(" ")
+st.write(" ")
 st.selectbox(
     "Select Person",
     options=data.people,
     key="id_selectbox",
     index=data.person_index(st.session_state["id"]),
-    # on_change=lambda: st.session_state.update(
-    #     {"id": data.person_to_id_map[st.session_state["id_selectbox"]]}
-    # ),
 )
 left, right = st.columns(2)
 if left.button(
@@ -54,10 +58,27 @@ if right.button(
     st.session_state["relationship_base_id"] = data.person_to_id_map[
         st.session_state["id_selectbox"]
     ]
-
+st.markdown("---")
+st.info(
+    f"Showing relationship to {data_funcs.get_col_value(st.session_state.relationship_base_id, Cols.NAME)}. Use the drop down menu above to change this."
+)
+st.markdown("## Descendant")
 ve.main_row(st.session_state["id"])
 
 st.markdown("""---""")
 left, middle, right = st.columns([2, 1, 2])
-middle.markdown("Children")
+st.markdown("## Children")
+cols = st.columns(4)
+with cols[0]:
+    if st.button(
+        "Add Child", key=f"add_child_{id}", use_container_width=True, type="secondary"
+    ):
+        st.session_state.update(
+            {
+                "editing_id": None,
+                "add_child": st.session_state["id"],
+                "add_spouse": None,
+            }
+        )
+        st.switch_page("pages/1_Add_person.py")
 ve.children_row(st.session_state["id"])

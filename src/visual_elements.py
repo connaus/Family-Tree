@@ -48,6 +48,7 @@ def main_row_card(id: int) -> None:
             "Parent(s)",
             key="parents_button",
             use_container_width=True,
+            type="primary",
         ):
             st.session_state["id"] = parent_id
             st.rerun()
@@ -59,6 +60,7 @@ def main_row_card(id: int) -> None:
         on_click=lambda: st.session_state.update(
             {"editing_id": id, "add_child": None, "add_spouse": None}
         ),
+        type="secondary",
     ):
         st.session_state.update(
             {"editing_id": id, "add_child": None, "add_spouse": None}
@@ -80,6 +82,7 @@ def spouse_card(id: int) -> None:
         on_click=lambda: st.session_state.update(
             {"editing_id": id, "add_child": None, "add_spouse": None}
         ),
+        type="secondary",
     ):
         st.session_state.update(
             {"editing_id": id, "add_child": None, "add_spouse": None}
@@ -102,6 +105,7 @@ def child_card(id: int) -> None:
         key=f"children_button_{id}",
         on_click=children_button_callback,
         use_container_width=True,
+        type="primary",
     )
 
 
@@ -113,10 +117,10 @@ def main_row(id) -> None:
     with columns[1]:
         if sp is not None:
             if len(sp) == 1:
-                st.markdown("Spouse:")
+                st.markdown("### Spouse:")
             else:
-                st.markdown("Spouses:")
-        if st.button("Add Spouse", key="add_spouse_button"):
+                st.markdown("### Spouses:")
+        if st.button("Add Spouse", key="add_spouse_button", type="secondary"):
             st.session_state.update(
                 {"editing_id": None, "add_child": None, "add_spouse": id}
             )
@@ -139,16 +143,3 @@ def children_row(id) -> None:
             col = i % 4
             with columns[col]:
                 child_card(int(id))
-    if columns[0].button(
-        "Add Child",
-        key=f"add_child_{id}",
-        use_container_width=True,
-    ):
-        st.session_state.update(
-            {
-                "editing_id": None,
-                "add_child": st.session_state["id"],
-                "add_spouse": None,
-            }
-        )
-        st.switch_page("pages/1_Add_person.py")
