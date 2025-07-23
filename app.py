@@ -30,7 +30,9 @@ st.info(
 )
 st.markdown("---")
 st.markdown("## Options")
-st.markdown("To see the full tree click here:")
+st.info(
+    "This page shows a specific decendant along with their children and spouse(s).\n\nTo see the full tree click here:"
+)
 if st.button("View Full Tree", key="full_tree_navigation", type="primary"):
     st.switch_page("pages/Full_Tree.py")
 st.write(" ")
@@ -58,10 +60,10 @@ if right.button(
     st.session_state["relationship_base_id"] = data.person_to_id_map[
         st.session_state["id_selectbox"]
     ]
-st.markdown("---")
 st.info(
     f"Showing relationship to {data_funcs.get_col_value(st.session_state.relationship_base_id, Cols.NAME)}. Use the drop down menu above to change this."
 )
+st.markdown("---")
 st.markdown("## Descendant")
 ve.main_row(st.session_state["id"])
 
