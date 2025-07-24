@@ -75,9 +75,17 @@ if st.button("Go Back to Tree", key="return_to_tree", type="primary"):
 st.markdown("# Enter Person Details")
 text_input("Name", Cols.NAME)
 
-selectbox("Parent", Cols.PARENT, data.people())
+selectbox(
+    "Parent",
+    Cols.PARENT,
+    data.people(remove_id=st.session_state.get("editing_id", None)),
+)
 
-selectbox("Spouse", Cols.SPOUSE, data.people())
+selectbox(
+    "Spouse",
+    Cols.SPOUSE,
+    data.people(remove_id=st.session_state.get("editing_id", None)),
+)
 
 if not (
     st.session_state.get(f"add_{Cols.NAME}") is not None
