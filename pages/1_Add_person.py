@@ -3,6 +3,13 @@ import pandas as pd
 import streamlit as st
 from cfg.table_schema import Cols
 from src.data import Data
+from src.authentication import Authenticator
+
+if "authenticator" not in st.session_state:
+    st.session_state["authenticator"] = Authenticator()
+authenticator: Authenticator = st.session_state.get("authenticator", Authenticator())
+authenticator.check_login()
+authenticator.authenticator.logout("Logout", "main")
 
 # set up
 id = st.session_state.get("editing_id", None)

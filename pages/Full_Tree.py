@@ -2,6 +2,13 @@ import streamlit as st
 from cfg.table_schema import Cols
 from src.data import Data
 import src.data_funcs as data_funcs
+from src.authentication import Authenticator
+
+if "authenticator" not in st.session_state:
+    st.session_state["authenticator"] = Authenticator()
+authenticator: Authenticator = st.session_state.get("authenticator", Authenticator())
+authenticator.check_login()
+authenticator.authenticator.logout("Logout", "main")
 
 
 def name(name: str, relationship: str, generation: int = 1, highlight=False) -> str:
