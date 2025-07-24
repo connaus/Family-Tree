@@ -3,6 +3,7 @@ from cfg.table_schema import Cols
 from src.data import Data
 import src.data_funcs as data_funcs
 from src.authentication import Authenticator
+import graphviz
 
 if "authenticator" not in st.session_state:
     st.session_state["authenticator"] = Authenticator()
@@ -29,9 +30,8 @@ def new_line() -> str:
     return "\n\n"
 
 
-def person_and_children(data: Data, id: int, tabs: int = 1) -> str:
+def full_tree_list(data: Data, id: int, tabs: int = 1) -> str:
     """Write a line for the provided person, and then one for each child"""
-    data = st.session_state.get("data", Data())
     person = data.id_to_person_map[id]
     highlight_list = data_funcs.get_lineage(st.session_state["relationship_base_id"])
     relationship = data_funcs.get_relationship(
@@ -54,9 +54,71 @@ def person_and_children(data: Data, id: int, tabs: int = 1) -> str:
         return s
     children_ids = children[Cols.ID].tolist()
     for child_id in children_ids:
-        s += new_line() + tab(tabs) + person_and_children(data, child_id, tabs=tabs + 1)
+        s += new_line() + tab(tabs) + full_tree_list(data, child_id, tabs=tabs + 1)
 
     return s
+
+
+def full_tree_graph(
+    data: Data,
+    graph: graphviz.Digraph,
+    id: int,
+    max_generation: int | None = None,
+    include_spouses: bool = True,
+    _iter: int = 1,
+) -> graphviz.Digraph:
+    """Write a line for the provided person, and then one for each child"""
+    person = data.id_to_person_map[id]
+    relationship_base_id = st.session_state.get("relationship_base_id", 0)
+    highlight_list = data_funcs.get_lineage(relationship_base_id)
+    relationship = data_funcs.get_relationship(relationship_base_id, id)
+    color = "green" if id in highlight_list else "black"
+    label = str(data_funcs.get_col_value(id, Cols.NAME))
+    dob = data_funcs.get_col_value(id, Cols.BIRTHDAY)
+    dod = data_funcs.get_col_value(id, Cols.DEATHDATE)
+    if dob and dod:
+        label += f"\n({dob} - {dod})"
+    elif dob:
+        label += f"\n({dob})"
+    elif dod:
+        label += f"\n({dod})"
+    label += f"\n{relationship}"
+    graph.node(person, label=label, color=color)
+    if include_spouses:
+        spouses = data_funcs.find_spouse(id)
+        if spouses is not None:
+            spouse_ids = spouses[Cols.ID].tolist()
+            for s_id in spouse_ids:
+                spouse_name = data.id_to_person_map[s_id]
+                marriage_date = spouses[spouses[Cols.ID] == s_id][
+                    Cols.MARRIAGEDATE
+                ].values[0]
+                label = (
+                    spouse_name
+                    if marriage_date is None
+                    else f"{spouse_name} ({marriage_date})"
+                )
+                graph.node(spouse_name, label, color="blue")
+                graph.edge(person, spouse_name, style="dashed", color="blue")
+    children = data_funcs.find_children(id)
+    if children is None:
+        return graph
+    _iter += 1
+    if max_generation is not None and _iter > max_generation:
+        return graph
+    children_ids = children[Cols.ID].tolist()
+    for child_id in children_ids:
+        full_tree_graph(
+            data,
+            graph,
+            child_id,
+            max_generation=max_generation,
+            include_spouses=include_spouses,
+            _iter=_iter,
+        )
+        color = "green" if child_id in highlight_list else "black"
+        graph.edge(person, data.id_to_person_map[child_id], color=color)
+    return graph
 
 
 data = st.session_state.get("data", Data())
@@ -102,5 +164,21 @@ st.info(
 )
 st.markdown("---")
 st.markdown("# Full Tree")
+t1, t2 = st.tabs(["List", "Graph"])
 tree_base = st.session_state.get("tree_base_id", 0)
-st.markdown(person_and_children(data, tree_base))
+t1.markdown(full_tree_list(data, tree_base))
+
+max_generations = t2.slider("Number of Generations to show", 1, 10, 7)
+include_spouses = t2.checkbox("Include Spouses")
+t2.markdown("---")
+# Create a graphlib graph object
+graph = graphviz.Digraph(graph_attr={"rankdir": "LR", "fontsize": "80"})
+graph = full_tree_graph(
+    data,
+    graph,
+    id=tree_base,
+    max_generation=max_generations,
+    include_spouses=include_spouses,
+)
+# graph = graph.unflatten()
+t2.graphviz_chart(graph, use_container_width=False)
