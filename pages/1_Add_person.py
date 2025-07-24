@@ -39,7 +39,7 @@ def selectbox(title: str, key: Cols, options: list[str]):
         start_id = int(sb_id)
         start_name = data.id_to_person_map[start_id]
         # parent_name = df[df[Cols.ID] == parent_id][Cols.NAME].values[0]
-        start_value = data.people.index(start_name)
+        start_value = data.people().index(start_name)
     else:
         start_value = None
     left, middle, right = st.columns([2, 3, 1])
@@ -75,9 +75,9 @@ if st.button("Go Back to Tree", key="return_to_tree", type="primary"):
 st.markdown("# Enter Person Details")
 text_input("Name", Cols.NAME)
 
-selectbox("Parent", Cols.PARENT, data.people)
+selectbox("Parent", Cols.PARENT, data.people())
 
-selectbox("Spouse", Cols.SPOUSE, data.people)
+selectbox("Spouse", Cols.SPOUSE, data.people())
 
 if not (
     st.session_state.get(f"add_{Cols.NAME}") is not None

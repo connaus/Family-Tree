@@ -60,7 +60,7 @@ if st.button(
 st.markdown("---")
 st.selectbox(
     "Select Person",
-    options=data.people,
+    options=data.people(),
     key="id_selectbox",
     index=data.person_index(st.session_state["id"]),
 )

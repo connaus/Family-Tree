@@ -54,7 +54,9 @@ class Data:
 
     @property
     def person_to_id_map(self) -> dict[str, int]:
-        """Create a dictionary of people with their names and birthdays as the key and their IDs as the value."""
+        """Create a dictionary of people with their names and birthdays as the key and their IDs as the value.
+        EAch name is unique wthe a DOB added, and a nuber added after if that is required.
+        """
         if self._person_to_id_map is not None:
             return self._person_to_id_map
         df = self.df.copy()
@@ -104,18 +106,19 @@ class Data:
         self._id_to_person_map = {v: k for k, v in self.person_to_id_map.items()}
         return self._id_to_person_map
 
-    @property
-    def people(self) -> list[str]:
-        """Get a sorted list of people names."""
-        if self._people is not None:
-            return self._people
-        self._people = sorted(self.person_to_id_map.keys())
-        return self._people
+    def people(self, descendants_only=True) -> list[str]:
+        """Get a sorted list of people names. Setting descendants only to False gives all names,
+        True return only people with a direct lineage to the first person."""
+        df = self.df.copy()
+        if descendants_only:
+            df = df[pd.notna(df[Cols.PARENT])]
+        people = df[Cols.ID].values.tolist()
+        return [self.id_to_person_map[i] for i in people]
 
     def person_index(self, id: int) -> int:
         """get the index of the person corresponding to the given id"""
         return (
-            self.people.index(self.id_to_person_map[id])
+            self.people(descendants_only=False).index(self.id_to_person_map[id])
             if id in self.id_to_person_map
             else 0
         )
