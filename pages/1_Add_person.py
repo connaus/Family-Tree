@@ -3,6 +3,13 @@ import pandas as pd
 import streamlit as st
 from cfg.table_schema import Cols
 from src.data import Data
+from src.authentication import Authenticator
+
+if "authenticator" not in st.session_state:
+    st.session_state["authenticator"] = Authenticator()
+authenticator: Authenticator = st.session_state.get("authenticator", Authenticator())
+authenticator.check_login()
+authenticator.authenticator.logout("Logout", "main")
 
 # set up
 id = st.session_state.get("editing_id", None)
@@ -39,7 +46,7 @@ def selectbox(title: str, key: Cols, options: list[str]):
         start_id = int(sb_id)
         start_name = data.id_to_person_map[start_id]
         # parent_name = df[df[Cols.ID] == parent_id][Cols.NAME].values[0]
-        start_value = data.people.index(start_name)
+        start_value = data.people().index(start_name)
     else:
         start_value = None
     left, middle, right = st.columns([2, 3, 1])
@@ -75,9 +82,17 @@ if st.button("Go Back to Tree", key="return_to_tree", type="primary"):
 st.markdown("# Enter Person Details")
 text_input("Name", Cols.NAME)
 
-selectbox("Parent", Cols.PARENT, data.people)
+selectbox(
+    "Parent",
+    Cols.PARENT,
+    data.people(remove_id=st.session_state.get("editing_id", None)),
+)
 
-selectbox("Spouse", Cols.SPOUSE, data.people)
+selectbox(
+    "Spouse",
+    Cols.SPOUSE,
+    data.people(remove_id=st.session_state.get("editing_id", None)),
+)
 
 if not (
     st.session_state.get(f"add_{Cols.NAME}") is not None
