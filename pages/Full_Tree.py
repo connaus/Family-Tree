@@ -62,17 +62,27 @@ st.selectbox(
     "Select Person",
     options=data.people(),
     key="id_selectbox",
-    index=data.person_index(st.session_state["id"]),
+    index=None,
+    # index=data.person_index(st.session_state["id"]),
 )
 left, middle, right = st.columns(3)
 if left.button("Set as Base", use_container_width=True, type="primary"):
-    st.session_state["tree_base_id"] = data.person_to_id_map[
-        st.session_state["id_selectbox"]
-    ]
+    selected_id: str = (
+        st.session_state.get("id_selectbox", None)
+        if (isinstance(st.session_state.get("id_selectbox"), str))
+        and (st.session_state.get("id_selectbox") is not None)
+        else data.id_to_person_map[0]
+    )
+    st.session_state["tree_base_id"] = data.person_to_id_map[selected_id]
 if middle.button("Highlight Lineage", use_container_width=True, type="primary"):
-    st.session_state["relationship_base_id"] = data.person_to_id_map[
-        st.session_state["id_selectbox"]
-    ]
+    selected_id: str = (
+        st.session_state.get("id_selectbox", None)
+        if (isinstance(st.session_state.get("id_selectbox"), str))
+        and (st.session_state.get("id_selectbox") is not None)
+        else data.id_to_person_map[0]
+    )
+
+    st.session_state["relationship_base_id"] = data.person_to_id_map[selected_id]
 if right.button("Reset", use_container_width=True, type="primary"):
     st.session_state["tree_base_id"] = 0
     st.session_state["relationship_base_id"] = 0

@@ -41,7 +41,7 @@ st.selectbox(
     "Select Person",
     options=data.people(),
     key="id_selectbox",
-    index=data.person_index(st.session_state["id"]),
+    index=None,
 )
 left, right = st.columns(2)
 if left.button(
@@ -50,7 +50,13 @@ if left.button(
     use_container_width=True,
     type="primary",
 ):
-    st.session_state["id"] = data.person_to_id_map[st.session_state["id_selectbox"]]
+    selected_id: str = (
+        st.session_state.get("id_selectbox", None)
+        if (isinstance(st.session_state.get("id_selectbox"), str))
+        and (st.session_state.get("id_selectbox") is not None)
+        else data.id_to_person_map[0]
+    )
+    st.session_state["id"] = data.person_to_id_map[selected_id]
 if right.button(
     "Show Relationships to this Person",
     key="relationship_button",
