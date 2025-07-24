@@ -26,7 +26,7 @@ class Data:
             },
             ttl=1,
         )
-        # df.set_index("id", inplace=True, drop=False)
+        self._df.set_index("id", inplace=True, drop=False)
         return self._df
 
     def update(self, data=None):
