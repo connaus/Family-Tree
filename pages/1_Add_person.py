@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from cfg.table_schema import Cols
+from src import data_funcs
 from src.data import Data
 from src.authentication import Authenticator
 
@@ -80,6 +81,11 @@ if st.button("Go Back to Tree", key="return_to_tree", type="primary"):
     st.switch_page("app.py")
     st.session_state["edit_row"] = None
 st.markdown("# Enter Person Details")
+if id is not None:
+    name = data_funcs.get_col_value(id, Cols.NAME)
+    s = f"You are currently editing the record for {name}. This will permanently overwrite the existing data."
+    s += "\n\nIf you want to add a new person to the tree, you must navigate to their parent or spouse to check if they are already there, then press the 'Add Child' or 'Add Spouse' button"
+    st.warning(s)
 text_input("Name", Cols.NAME)
 
 selectbox(

@@ -69,7 +69,7 @@ if right.button(
         st.session_state["id_selectbox"]
     ]
 st.info(
-    f"Showing relationship to {data_funcs.get_col_value(st.session_state.relationship_base_id, Cols.NAME)}. Use the drop down menu above to change this."
+    f"Showing relationship to {data_funcs.get_col_value(st.session_state.relationship_base_id, Cols.NAME)}. Use the drop down menu and the 'Show Relationships to this Person' button above to change this."
 )
 st.markdown("---")
 st.markdown("## Descendant")

@@ -40,6 +40,7 @@ def main_row_card(id: int) -> None:
     """Display the card for the main person, including button for parent"""
     conn = st.container(border=True)
     parent_id = data_funcs.get_col_value(id, Cols.PARENT)
+    name = data_funcs.get_col_value(id, Cols.NAME)
     if parent_id is not None:
         parent_id = int(parent_id)
 
@@ -54,13 +55,10 @@ def main_row_card(id: int) -> None:
             st.rerun()
     person_card(id, conn)
     if id != 0:
-        if st.button(
-            "Edit",
+        if conn.button(
+            f"Edit {name}",
             key=f"edit_{id}",
             use_container_width=True,
-            on_click=lambda: st.session_state.update(
-                {"editing_id": id, "add_child": None, "add_spouse": None}
-            ),
             type="secondary",
         ):
             st.session_state.update(
@@ -74,10 +72,11 @@ def spouse_card(id: int) -> None:
     conn = st.container(border=True)
     person_card(id, conn)
     marriage_date = data_funcs.get_col_value(id, Cols.MARRIAGEDATE)
+    name = data_funcs.get_col_value(id, Cols.NAME)
     if marriage_date is not None:
         conn.markdown(f"**Marrriage Date**\n\n{marriage_date}")
-    if st.button(
-        "Edit",
+    if conn.button(
+        f"Edit {name}",
         key=f"edit_{id}",
         use_container_width=True,
         on_click=lambda: st.session_state.update(
