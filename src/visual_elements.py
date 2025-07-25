@@ -53,19 +53,20 @@ def main_row_card(id: int) -> None:
             st.session_state["id"] = parent_id
             st.rerun()
     person_card(id, conn)
-    if st.button(
-        "Edit",
-        key=f"edit_{id}",
-        use_container_width=True,
-        on_click=lambda: st.session_state.update(
-            {"editing_id": id, "add_child": None, "add_spouse": None}
-        ),
-        type="secondary",
-    ):
-        st.session_state.update(
-            {"editing_id": id, "add_child": None, "add_spouse": None}
-        )
-        st.switch_page("pages/1_Add_person.py")
+    if id != 0:
+        if st.button(
+            "Edit",
+            key=f"edit_{id}",
+            use_container_width=True,
+            on_click=lambda: st.session_state.update(
+                {"editing_id": id, "add_child": None, "add_spouse": None}
+            ),
+            type="secondary",
+        ):
+            st.session_state.update(
+                {"editing_id": id, "add_child": None, "add_spouse": None}
+            )
+            st.switch_page("pages/1_Add_person.py")
 
 
 def spouse_card(id: int) -> None:
