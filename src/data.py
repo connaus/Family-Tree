@@ -106,14 +106,18 @@ class Data:
         self._id_to_person_map = {v: k for k, v in self.person_to_id_map.items()}
         return self._id_to_person_map
 
-    def people(self, descendants_only=True, remove_id: int | None = None) -> list[str]:
+    def people(
+        self, descendants_only=True, remove_ids: int | list[int] = []
+    ) -> list[str]:
         """Get a sorted list of people names. Setting descendants only to False gives all names,
         True return only people with a direct lineage to the first person."""
         df = self.df.copy()
         if descendants_only:
             df = df[(pd.notna(df[Cols.PARENT])) | (df[Cols.ID] == 0)]
-        if remove_id:
-            df = df[df[Cols.ID] != remove_id]
+        if remove_ids:
+            if isinstance(remove_ids, int):
+                remove_ids = [remove_ids]
+            df = df[~df[Cols.ID].isin(remove_ids)]
         people = df[Cols.ID].values.tolist()
         return [self.id_to_person_map[i] for i in people]
 

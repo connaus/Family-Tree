@@ -6,7 +6,6 @@ import src.visual_elements as ve
 from src.authentication import Authenticator
 
 st.set_page_config(layout="wide")
-
 if "authenticator" not in st.session_state:
     st.session_state["authenticator"] = Authenticator()
 authenticator: Authenticator = st.session_state.get("authenticator", Authenticator())

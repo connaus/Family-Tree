@@ -27,9 +27,14 @@ elif id is None:
         row[Cols.PARENT] = parent
     if spouse is not None:
         row[Cols.SPOUSE] = spouse
+    remove_ids = []
+    st.session_state["remove_ids"] = remove_ids
 else:
     st.session_state["original_row"] = df[df[Cols.ID] == id].iloc[0]
     row = df[df[Cols.ID] == id].iloc[0]
+    remove_ids = data_funcs.find_all_descendants(id)
+    remove_ids.append(id)
+    st.session_state["remove_ids"] = remove_ids
 row = row.replace({np.nan: None})
 
 
@@ -47,7 +52,7 @@ def selectbox(title: str, key: Cols, options: list[str]):
         start_id = int(sb_id)
         start_name = data.id_to_person_map[start_id]
         # parent_name = df[df[Cols.ID] == parent_id][Cols.NAME].values[0]
-        start_value = data.people().index(start_name)
+        start_value = options.index(start_name)
     else:
         start_value = None
     left, middle, right = st.columns([2, 3, 1])
@@ -104,13 +109,13 @@ text_input("Name", Cols.NAME)
 selectbox(
     "Parent",
     Cols.PARENT,
-    data.people(remove_id=st.session_state.get("editing_id", None)),
+    data.people(remove_ids=st.session_state["remove_ids"]),
 )
 
 selectbox(
     "Spouse",
     Cols.SPOUSE,
-    data.people(remove_id=st.session_state.get("editing_id", None)),
+    data.people(remove_ids=st.session_state["remove_ids"]),
 )
 
 if not (

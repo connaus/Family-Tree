@@ -43,6 +43,18 @@ def find_children(id: int) -> pd.DataFrame | None:
     return df
 
 
+def find_all_descendants(id: int) -> list[int]:
+    """find all descendants"""
+    children = find_children(id)
+    if children is None:
+        return []
+    desc = [int(i) for i in children[Cols.ID].values]
+    for cid in desc:
+        desc.extend(find_all_descendants(cid))
+    desc.sort()
+    return desc
+
+
 @st.cache_data
 def get_lineage(id) -> list[int]:
     """returns a list of ids startig with the provided id and ending with the First Male Connaughton"""
