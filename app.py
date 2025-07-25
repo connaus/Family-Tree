@@ -6,7 +6,6 @@ import src.visual_elements as ve
 from src.authentication import Authenticator
 
 st.set_page_config(layout="wide")
-
 if "authenticator" not in st.session_state:
     st.session_state["authenticator"] = Authenticator()
 authenticator: Authenticator = st.session_state.get("authenticator", Authenticator())
@@ -33,7 +32,7 @@ st.warning(
 st.markdown("---")
 st.markdown("## Options")
 st.info(
-    "This page shows a specific decendant along with their children and spouse(s).\n\nTo see the full tree click here:"
+    "This page shows a specific descendant along with their children and spouse(s).\n\nTo see the full tree click here:"
 )
 if st.button("View Full Tree", key="full_tree_navigation", type="primary"):
     st.switch_page("pages/Full_Tree.py")
@@ -69,7 +68,7 @@ if right.button(
         st.session_state["id_selectbox"]
     ]
 st.info(
-    f"Showing relationship to {data_funcs.get_col_value(st.session_state.relationship_base_id, Cols.NAME)}. Use the drop down menu above to change this."
+    f"Showing relationship to {data_funcs.get_col_value(st.session_state.relationship_base_id, Cols.NAME)}. Use the drop down menu and the 'Show Relationships to this Person' button above to change this."
 )
 st.markdown("---")
 st.markdown("## Descendant")
