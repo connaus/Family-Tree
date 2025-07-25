@@ -77,10 +77,23 @@ def selectbox(title: str, key: Cols, options: list[str]):
     )
 
 
-if st.button("Go Back to Tree", key="return_to_tree", type="primary"):
+def return_to_nav() -> None:
+    st.session_state.update(
+        {
+            "original_row": None,
+            "editing_id": None,
+            "add_child": None,
+            "add_spouse": None,
+        }
+    )
     st.switch_page("app.py")
-    st.session_state["edit_row"] = None
-st.markdown("# Enter Person Details")
+
+
+if st.session_state.get("cancel_change", False):
+    return_to_nav()
+if st.button("Go Back to Tree", key="return_to_tree", type="primary"):
+    return_to_nav()
+    st.markdown("# Enter Person Details")
 if id is not None:
     name = data_funcs.get_col_value(id, Cols.NAME)
     s = f"You are currently editing the record for {name}. This will permanently overwrite the existing data."
@@ -141,47 +154,89 @@ def add_value_to_row(key: Cols):
             row[key] = value
 
 
+def confirm_overwrite() -> None:
+    """Confirm change if overwrite"""
+    if (
+        not st.session_state.get("confirm_overwrite", False)
+        and st.session_state.get("editing_id", None) is not None
+    ):
+        st.warning(
+            f"Press confirm to permanently overwrite data for {name}. Press cancel to return to main screen."
+        )
+        cols = st.columns(2)
+        with cols[0]:
+            st.button(
+                "Confirm",
+                key="confirm_overwrite",
+                type="primary",
+                use_container_width=True,
+            )
+        with cols[1]:
+            st.button(
+                "Cancel",
+                key="cancel_change",
+                type="primary",
+                use_container_width=True,
+            )
+        st.stop()
+
+
 st.markdown("---")
 left, middle, right = st.columns([1, 1, 1])
-if left.button("Save Changes", key="save_changes", type="primary"):
-    st.markdown(":green[Saving...]")
-    add_value_to_row(Cols.NAME)
-    add_value_to_row(Cols.NAME)
-    add_value_to_row(Cols.PARENT)
-    add_value_to_row(Cols.SPOUSE)
-    add_value_to_row(Cols.BIRTHDAY)
-    add_value_to_row(Cols.BIRTHPLACE)
-    add_value_to_row(Cols.MARRIAGEDATE)
-    # update data to ensure that we are changing the latest available data
-    current_data = data.read()
-    if st.session_state.get("editing_id", None) is not None:
-        saved_row: pd.Series = current_data[current_data["id"] == id].iloc[0]
-        if not saved_row.equals(st.session_state["original_row"]):
-            st.markdown(
-                ":green[No changes made to the data as it has been updated by another user! Please try again later.]"
-            )
-            st.session_state.update(
-                {
-                    "editing_id": None,
-                    "add_child": None,
-                    "add_spouse": None,
-                }
-            )
-            st.stop()
-        df[df["id"] == id] = row
-    else:
-        row[Cols.ID] = int(current_data[Cols.ID].max() + 1)
-        df = pd.concat([df, pd.DataFrame([row.to_dict()])], ignore_index=True)
-    data.df = df
-    st.session_state.update(
-        {
-            "original_row": None,
-            "editing_id": None,
-            "add_child": None,
-            "add_spouse": None,
-        }
-    )
-    st.switch_page("app.py")
+if left.button(
+    "Save Changes", key="save_changes", type="primary"
+) or st.session_state.get("confirm_overwrite", False):
+    confirm_overwrite()
+    with st.spinner(":green[Saving...]"):
+        # st.markdown(":green[Saving...]")
+        add_value_to_row(Cols.NAME)
+        add_value_to_row(Cols.NAME)
+        add_value_to_row(Cols.PARENT)
+        add_value_to_row(Cols.SPOUSE)
+        add_value_to_row(Cols.BIRTHDAY)
+        add_value_to_row(Cols.BIRTHPLACE)
+        add_value_to_row(Cols.MARRIAGEDATE)
+        # update data to ensure that we are changing the latest available data
+        current_data = data.read()
+        if st.session_state.get("editing_id", None) is not None:
+            if not st.session_state.get("confirm_overwrite", False):
+                st.warning(
+                    f"Press confirm to permanently overwrite data for {name}. Press cancel to return to main screen."
+                )
+                cols = st.columns(2)
+                with cols[0]:
+                    st.button(
+                        "Confirm",
+                        key="confirm_overwrite",
+                        type="primary",
+                        use_container_width=True,
+                    )
+                with cols[1]:
+                    st.button(
+                        "Cancel",
+                        key="cancel_change",
+                        type="primary",
+                        use_container_width=True,
+                    )
+                st.stop()
+            saved_row: pd.Series = current_data[current_data["id"] == id].iloc[0]
+            if not saved_row.equals(st.session_state["original_row"]):
+                st.markdown(
+                    ":green[No changes made to the data as it has been updated by another user! Please try again later.]"
+                )
+                st.session_state.update(
+                    {
+                        "editing_id": None,
+                        "add_child": None,
+                        "add_spouse": None,
+                    }
+                )
+                st.stop()
+            df[df["id"] == id] = row
+        else:
+            row[Cols.ID] = int(current_data[Cols.ID].max() + 1)
+            df = pd.concat([df, pd.DataFrame([row.to_dict()])], ignore_index=True)
+        data.df = df
+        return_to_nav()
 if right.button("Cancel", key="cancel_add_person", type="primary"):
-    st.switch_page("app.py")
-    st.session_state["edit_row"] = None
+    return_to_nav()
