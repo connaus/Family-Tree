@@ -46,7 +46,7 @@ def main_row_card(id: int) -> None:
 
     if parent_id is not None:
         if conn.button(
-            "Parent(s)",
+            "See Parent(s)",
             key="parents_button",
             use_container_width=True,
             type="primary",
@@ -94,6 +94,7 @@ def child_card(id: int) -> None:
     """Display details for a child, along with a button to show their children"""
     conn = st.container(border=True)
     person_card(id, conn)
+    name = data_funcs.get_col_value(id, Cols.NAME)
 
     def children_button_callback():
         """Callback for the children button."""
@@ -101,7 +102,7 @@ def child_card(id: int) -> None:
         st.rerun()
 
     conn.button(
-        "Details",
+        f"See {name} Details",
         key=f"children_button_{id}",
         on_click=children_button_callback,
         use_container_width=True,
