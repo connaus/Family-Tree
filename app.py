@@ -32,7 +32,7 @@ st.warning(
 st.markdown("---")
 st.markdown("## Options")
 st.info(
-    "This page shows a specific decendant along with their children and spouse(s).\n\nTo see the full tree click here:"
+    "This page shows a specific descendant along with their children and spouse(s).\n\nTo see the full tree click here:"
 )
 if st.button("View Full Tree", key="full_tree_navigation", type="primary"):
     st.switch_page("pages/Full_Tree.py")
