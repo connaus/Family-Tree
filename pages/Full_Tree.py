@@ -33,10 +33,9 @@ def new_line() -> str:
 def full_tree_list(data: Data, id: int, tabs: int = 1) -> str:
     """Write a line for the provided person, and then one for each child"""
     person = data.id_to_person_map[id]
-    highlight_list = data_funcs.get_lineage(st.session_state["relationship_base_id"])
-    relationship = data_funcs.get_relationship(
-        st.session_state["relationship_base_id"], id
-    )
+    relationship_base_id = st.session_state.get("relationship_base_id", 0)
+    highlight_list = data_funcs.get_lineage(relationship_base_id)
+    relationship = data_funcs.get_relationship(relationship_base_id, id)
     s = name(person, relationship, generation=tabs, highlight=id in highlight_list)
     spouses = data_funcs.find_spouse(id)
     if spouses is not None:
