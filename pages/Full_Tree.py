@@ -3,8 +3,10 @@ from cfg.table_schema import Cols
 from src.data import Data
 import src.data_funcs as data_funcs
 from src.authentication import Authenticator
-import graphviz
 
+from src.mermaid import Mermaid, Orientation
+
+st.set_page_config(layout="wide")
 if "authenticator" not in st.session_state:
     st.session_state["authenticator"] = Authenticator()
 authenticator: Authenticator = st.session_state.get("authenticator", Authenticator())
@@ -58,31 +60,22 @@ def full_tree_list(data: Data, id: int, tabs: int = 1) -> str:
     return s
 
 
-def full_tree_graph(
-    data: Data,
-    graph: graphviz.Digraph,
+def build_tree(
+    graph: Mermaid,
     id: int,
     max_generation: int | None = None,
     include_spouses: bool = True,
     _iter: int = 1,
-) -> graphviz.Digraph:
+) -> Mermaid:
     """Write a line for the provided person, and then one for each child"""
+    data: Data = st.session_state.get("data", Data())
     person = data.id_to_person_map[id]
     relationship_base_id = st.session_state.get("relationship_base_id", 0)
     highlight_list = data_funcs.get_lineage(relationship_base_id)
     relationship = data_funcs.get_relationship(relationship_base_id, id)
-    color = "green" if id in highlight_list else "black"
-    label = str(data_funcs.get_col_value(id, Cols.NAME))
-    dob = data_funcs.get_col_value(id, Cols.BIRTHDAY)
-    dod = data_funcs.get_col_value(id, Cols.DEATHDATE)
-    if dob and dod:
-        label += f"\n({dob} - {dod})"
-    elif dob:
-        label += f"\n({dob})"
-    elif dod:
-        label += f"\n({dod})"
-    label += f"\n{relationship}"
-    graph.node(person, label=label, color=color)
+    graph.add_node(
+        person, label=f"{person}\n{relationship}", ancestor=id in highlight_list
+    )
     if include_spouses:
         spouses = data_funcs.find_spouse(id)
         if spouses is not None:
@@ -97,26 +90,25 @@ def full_tree_graph(
                     if marriage_date is None
                     else f"{spouse_name} ({marriage_date})"
                 )
-                graph.node(spouse_name, label, color="blue")
-                graph.edge(person, spouse_name, style="dashed", color="blue")
+                graph.add_node(spouse_name, label)
+                graph.add_edge(person, spouse_name, spouse=True)
     children = data_funcs.find_children(id)
     if children is None:
         return graph
-    _iter += 1
+    # _iter += 1
     if max_generation is not None and _iter > max_generation:
         return graph
     children_ids = children[Cols.ID].tolist()
     for child_id in children_ids:
-        full_tree_graph(
-            data,
+        build_tree(
             graph,
             child_id,
             max_generation=max_generation,
             include_spouses=include_spouses,
             _iter=_iter,
         )
-        color = "green" if child_id in highlight_list else "black"
-        graph.edge(person, data.id_to_person_map[child_id], color=color)
+        child_name = data.id_to_person_map[child_id]
+        graph.add_edge(person, child_name)
     return graph
 
 
@@ -163,21 +155,20 @@ st.info(
 )
 st.markdown("---")
 st.markdown("# Full Tree")
-t1, t2 = st.tabs(["List", "Graph"])
+graph_type = st.radio("Select Graph Type", options=["Graph", "List"], horizontal=True)
 tree_base = st.session_state.get("tree_base_id", 0)
-t1.markdown(full_tree_list(data, tree_base))
+if graph_type == "List":
+    st.markdown(full_tree_list(data, tree_base))
 
-max_generations = t2.slider("Number of Generations to show", 1, 10, 7)
-include_spouses = t2.checkbox("Include Spouses")
-t2.markdown("---")
-# Create a graphlib graph object
-graph = graphviz.Digraph(graph_attr={"rankdir": "LR", "fontsize": "80"})
-graph = full_tree_graph(
-    data,
-    graph,
-    id=tree_base,
-    max_generation=max_generations,
-    include_spouses=include_spouses,
-)
-# graph = graph.unflatten()
-t2.graphviz_chart(graph, use_container_width=False)
+else:
+    max_generations = st.slider("Number of Generations to show", 1, 10, 7)
+    include_spouses = st.checkbox("Include Spouses")
+    st.markdown("---")
+    # Create a graphlib graph object
+    m = build_tree(
+        Mermaid(orientation=Orientation.LR),
+        id=tree_base,
+        max_generation=max_generations,
+        include_spouses=include_spouses,
+    )
+    m()

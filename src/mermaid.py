@@ -1,4 +1,5 @@
 from enum import StrEnum
+import re
 import streamlit_mermaid as stmd
 
 
@@ -26,7 +27,7 @@ class Mermaid:
 
     def add_node(self, name: str, label: str, ancestor: bool = False) -> None:
         """add a node to the graph. names must be unique. Labels will be displayed. Ancestors will be coloured"""
-        name = name.replace(" ", "")
+        name = re.sub("[^a-zA-Z0-9]", "", name)
         self.node_names.append(name)
         self.nodes.append(f'{name}(["{label}"])')
         if ancestor:
@@ -34,8 +35,8 @@ class Mermaid:
 
     def add_edge(self, name_from: str, name_to: str, spouse: bool = False) -> None:
         """add an edge between two existing nodes. The line wil be dotted if it is a spouse"""
-        name_from = name_from.replace(" ", "")
-        name_to = name_to.replace(" ", "")
+        name_from = re.sub("[^a-zA-Z0-9]", "", name_from)
+        name_to = re.sub("[^a-zA-Z0-9]", "", name_to)
         if name_from not in self.node_names:
             raise ValueError(
                 f"The node {name_from} is not a recognised node. Use add_node to add it."
@@ -59,5 +60,4 @@ class Mermaid:
         if self.ancestor:
             code += f"classDef desc fill:{self.ancestor_colour},stroke:#333;\n"
             code += f"class {','.join(self.ancestor)} desc"
-        print(code)
-        stmd.st_mermaid(code, width=self.width)
+        stmd.st_mermaid(code, width=self.width, height="auto")
