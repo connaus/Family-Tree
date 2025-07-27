@@ -1,4 +1,5 @@
 import re
+import time
 import numpy as np
 import pandas as pd
 from streamlit_gsheets import GSheetsConnection
@@ -32,6 +33,7 @@ class Data:
     def update(self, data=None):
         if data is not None:
             self.conn.update(worksheet=self.worksheet, data=data)
+            time.sleep(1)
             self.read()
 
     @property
