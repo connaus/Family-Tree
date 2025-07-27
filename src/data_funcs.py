@@ -159,7 +159,7 @@ def get_relationship(start_id: int, end_id: int) -> str:
     if min_dist == 3:
         s += "Second "
     if min_dist == 4:
-        s += "third "
+        s += "Third "
     if min_dist == 5:
         s += f"{min_dist - 1}th "
     s += "Cousin"
@@ -167,10 +167,10 @@ def get_relationship(start_id: int, end_id: int) -> str:
     if removed == 0:
         return s
     if removed == 1:
-        s += " once removed"
+        s += " Once Removed"
         return s
     if removed == 2:
-        s += " twice removed"
+        s += " Twice Removed"
         return s
-    s += f"{removed} times remove"
+    s += f" {removed} Times Removed"
     return s
