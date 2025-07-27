@@ -201,6 +201,7 @@ if left.button(
         add_value_to_row(Cols.BIRTHDAY)
         add_value_to_row(Cols.BIRTHPLACE)
         add_value_to_row(Cols.MARRIAGEDATE)
+        add_value_to_row(Cols.DEATHDATE)
         # update data to ensure that we are changing the latest available data
         current_data = data.read()
         if st.session_state.get("editing_id", None) is not None:
