@@ -1,6 +1,7 @@
 # Family Tree App
 
 This Streamlit app displays and manages a family tree, designed for a specific family gathering. The app is password protected and allows users to view, add, and edit family members, visualize relationships, and explore the full descendant tree.
+This app is published [here](https://family-tree.streamlit.app/). 
 
 ## Features
 
@@ -43,7 +44,7 @@ This Streamlit app displays and manages a family tree, designed for a specific f
 Start the app with:
 
 ```sh
-streamlit run [app.py](http://_vscodecontentref_/0)
+streamlit run app.py
 ```
 Or use the provided batch file on Windows:
 [start.bat](http://_vscodecontentref_/1)
