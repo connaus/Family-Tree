@@ -18,7 +18,7 @@ This app is published [here](https://family-tree.streamlit.app/).
 
 - Python 3.10+
 - [Streamlit](https://streamlit.io/)
-- Google Sheets credentials (see below)
+- Google Sheets credentials (see above)
 
 ### Installation
 
